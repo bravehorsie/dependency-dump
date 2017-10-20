@@ -65,6 +65,7 @@ public class Runner {
 
     private TreeMap<String, Dependency> directDependencies = new TreeMap<>();
     private final List<DependencyNode> transitiveDependencies = new ArrayList<>();
+    private Model model;
 
     private String[] excludes;
 
@@ -100,7 +101,7 @@ public class Runner {
     private void printFlat() {
         logger.info(" === Direct dependencies: === \n");
         List<Dependency> directFiltered = directDependencies.values().stream().filter(
-                (dependency -> !dependencyExcluded(dependency)))
+                (dependency -> !dependencyExcluded(dependency, getManagedDependency(model, dependency))))
                 .collect(Collectors.toList());
         directFiltered.forEach((dependency) -> {
             logger.info(dependency.getGroupId() + ":" + dependency.getArtifactId() +":" +dependency.getType() + ":" + dependency.getVersion() + ":" +dependency.getScope());
@@ -184,7 +185,7 @@ public class Runner {
 
     private void parsePom(String projectDir) {
 
-        Model model = loadModel(projectDir);
+        model = loadModel(projectDir);
 
         if (model.getPackaging().equals("pom")) {
             for (String module : model.getModules()) {
@@ -195,11 +196,11 @@ public class Runner {
 
         List<Dependency> dependencies = model.getDependencies();
         for (org.apache.maven.model.Dependency dependency : dependencies) {
-            String artifactId = dependency.getGroupId() + ":" + dependency.getArtifactId() + ":" + dependency.getVersion();
+            String artifactId = toArtifactId(dependency);
 
             directDependencies.put(artifactId, dependency);
             DependencyResolver dependencyResolver = new DependencyResolver(repositorySupport);
-            if (dependencyExcluded(dependency)) {
+            if (dependencyExcluded(dependency, getManagedDependency(model, dependency))) {
                 continue;
             }
             try {
@@ -216,8 +217,21 @@ public class Runner {
 
     }
 
-    private boolean dependencyExcluded(Dependency dependency) {
-        if (dependency.isOptional()) {
+    private String toArtifactId(Dependency dependency) {
+        return dependency.getGroupId() + ":" + dependency.getArtifactId() + ":" + dependency.getVersion();
+    }
+
+    private Dependency getManagedDependency(Model model, Dependency dependency) {
+        for (Dependency managed : model.getDependencyManagement().getDependencies()) {
+            if (managed.getGroupId().equals(dependency.getGroupId()) && managed.getArtifactId().equals(dependency.getArtifactId())) {
+                return managed;
+            }
+        }
+        return null;
+    }
+
+    private boolean dependencyExcluded(Dependency dependency, Dependency managed) {
+        if (dependency.isOptional() || (managed != null && managed.isOptional())) {
             return true;
         }
         if (excludes != null) {

@@ -1,6 +1,7 @@
 ### Dumps dependencies of maven project
 
 Collect dependencies of a maven project and its modules / submodules. Prints all direct / transitive dependencies as flat list.
+Dependencies which are "optional" or were excluded in referencing dependency are not printed to the list.
 
 Be sure to install you project into local repository before running, otherwise versions not present in central (*-SNAPSHOT) for exampe will not be found. By installing to local running time is reduced dozen times.
 
