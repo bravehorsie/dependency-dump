@@ -121,6 +121,10 @@ public class Main {
             runner.setPrintTree(true);
         }
 
+        if (line.hasOption(includeLicense)) {
+            runner.setIncludeLicense(true);
+        }
+
         runner.run();
     }
 

@@ -75,6 +75,7 @@ public class Runner {
 
     private boolean printTree;
     private final ModelResolver modelResolver;
+    private boolean includeLicense;
 
     public Runner(String rootProjectDir, String localRepo) {
         this.rootProjectDir = rootProjectDir;
@@ -111,6 +112,9 @@ public class Runner {
                 .collect(Collectors.toList());
         directFiltered.forEach((dependency) -> {
             logger.info(dependency.getGroupId() + ":" + dependency.getArtifactId() +":" +dependency.getType() + ":" + dependency.getVersion() + ":" +dependency.getScope());
+            if (!includeLicense) {
+                return;
+            }
             try {
                 ModelSource modelSource = modelResolver.resolveModel(dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion());
                 Model model = loadModel(modelSource);
@@ -345,6 +349,10 @@ public class Runner {
         this.printTree = printTree;
     }
 
+    public void setIncludeLicense(boolean includeLicense) {
+        this.includeLicense = includeLicense;
+    }
+
     private static final class ProjectArtifact {
         private final String groupId;
         private final String versionId;
@@ -383,4 +391,5 @@ public class Runner {
             return Objects.hash(groupId, versionId, version);
         }
     }
+
 }
