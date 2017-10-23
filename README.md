@@ -10,19 +10,19 @@ Two arguments are required for running: "path to your project" and "path to your
 
 ```
 Usage:
-java -jar dependencydump.jar project ~/path/to/projectsources localRepo ~/path/to/local/maven/repo
+java -jar dependencydump.jar -project ~/path/to/projectsources -localRepo ~/path/to/local/maven/repo
 
 Optional parameters:
 
-    excludeGroups
+    -excludeGroups
         Excludes dependencies with specified groupIds separated by comma.
         Transitive dependencies of excluded artifacts will not be printed, use with caution.
 
-    includeScopes
+    -includeScopes
         Include only dependencies with specified scopes. Separated by comma.
         Transitive dependencies of excluded artifacts will not be printed, use with caution.
 
-    printTree
+    -printTree
         Print dependencies as a tree merged from all subprojects instead of flat output. Default false.
 ```        
 
@@ -35,8 +35,6 @@ Optional parameters:
 
 `mvn clean install` in dependency-dump
 
-`java -jar target/dependency-dump-1.0-SNAPSHOT-jar-with-dependencies.jar project=~/dev/java/jaxb-ri/ localRepo=~/.m2/repository/ includeScopes=compile,provided`
+`java -jar target/dependency-dump-1.0-SNAPSHOT-jar-with-dependencies.jar -project ~/dev/java/jaxb-ri/ -localRepo=~/.m2/repository/ -includeScopes=compile,provided`
 
-For use behind a proxy:
-
-`java -Dhttp.proxyHost=your.proxy.com -Dhttp.proxyPort=80 -jar target/dependency-dump-1.0-SNAPSHOT-jar-with-dependencies.jar project=/home/roma/dev/java/jersey/ localRepo=~/.m2/repository/ includeScopes=compile,provided`
+Proxy configuration is read from "http_proxy" environment variable or http.proxyHost/http.proxyPort system variables.

@@ -40,6 +40,7 @@
 
 package com.oracle.ee4j.dependencydump;
 
+import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.building.*;
@@ -65,6 +66,7 @@ public class Runner {
 
     private TreeMap<String, Dependency> directDependencies = new TreeMap<>();
     private final List<DependencyNode> transitiveDependencies = new ArrayList<>();
+    private final Set<ProjectArtifact> projectArtifacts = new HashSet<>();
     private Model model;
 
     private String[] excludes;
@@ -72,15 +74,18 @@ public class Runner {
     private String[] scopes;
 
     private boolean printTree;
+    private final ModelResolver modelResolver;
 
     public Runner(String rootProjectDir, String localRepo) {
         this.rootProjectDir = rootProjectDir;
         this.repositorySupport = new RepositorySupport(localRepo);
+        this.modelResolver = new ExternalModelResolver(repositorySupport);
     }
 
     public Runner(String rootProjectDir, String localRepo, String proxyHost, int proxyPort) {
         this.rootProjectDir = rootProjectDir;
         this.repositorySupport = new RepositorySupport(localRepo, proxyHost, proxyPort);
+        this.modelResolver = new ExternalModelResolver(repositorySupport);
     }
 
     public void run() {
@@ -101,7 +106,8 @@ public class Runner {
     private void printFlat() {
         logger.info(" === Direct dependencies: === \n");
         List<Dependency> directFiltered = directDependencies.values().stream().filter(
-                (dependency -> !dependencyExcluded(dependency, getManagedDependency(model, dependency))))
+                (dependency -> !dependencyExcluded(dependency, getManagedDependency(model, dependency))
+                        && !projectArtifacts.contains(new ProjectArtifact(dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion()))))
                 .collect(Collectors.toList());
         directFiltered.forEach((dependency) -> {
             logger.info(dependency.getGroupId() + ":" + dependency.getArtifactId() +":" +dependency.getType() + ":" + dependency.getVersion() + ":" +dependency.getScope());
@@ -186,6 +192,8 @@ public class Runner {
     private void parsePom(String projectDir) {
 
         model = loadModel(projectDir);
+
+        projectArtifacts.add(new ProjectArtifact(model.getGroupId(), model.getArtifactId(), model.getVersion()));
 
         if (model.getPackaging().equals("pom")) {
             for (String module : model.getModules()) {
@@ -284,7 +292,6 @@ public class Runner {
             throw new IllegalStateException("Pom file not exists: " + pomFile.getAbsolutePath());
         }
 
-        ModelResolver modelResolver = new ExternalModelResolver(repositorySupport);
         final DefaultModelBuildingRequest modelBuildingRequest = new DefaultModelBuildingRequest()
                 .setSystemProperties(System.getProperties()).setModelResolver(modelResolver).setPomFile(pomFile);
 
@@ -310,5 +317,44 @@ public class Runner {
 
     public void setPrintTree(boolean printTree) {
         this.printTree = printTree;
+    }
+
+    private static final class ProjectArtifact {
+        private final String groupId;
+        private final String versionId;
+        private final String version;
+
+        public ProjectArtifact(String groupId, String versionId, String version) {
+            this.groupId = groupId;
+            this.versionId = versionId;
+            this.version = version;
+        }
+
+        public String getGroupId() {
+            return groupId;
+        }
+
+        public String getVersionId() {
+            return versionId;
+        }
+
+        public String getVersion() {
+            return version;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ProjectArtifact that = (ProjectArtifact) o;
+            return Objects.equals(groupId, that.groupId) &&
+                    Objects.equals(versionId, that.versionId) &&
+                    Objects.equals(version, that.version);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(groupId, versionId, version);
+        }
     }
 }
