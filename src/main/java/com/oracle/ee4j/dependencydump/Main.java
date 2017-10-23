@@ -135,11 +135,11 @@ public class Main {
         }
         proxyHost = System.getenv("http_proxy");
         if (proxyHost != null) {
-            return proxyHost.substring(0, proxyHost.indexOf(":"));
+            return proxyHost.substring(0, proxyHost.lastIndexOf(":"));
         }
         proxyHost = System.getenv("HTTP_PROXY");
         if (proxyHost != null) {
-            return proxyHost.substring(0, proxyHost.indexOf(":"));
+            return proxyHost.substring(0, proxyHost.lastIndexOf(":"));
         }
         return null;
     }
@@ -151,11 +151,11 @@ public class Main {
         }
         proxyPort = System.getenv("http_proxy");
         if (proxyPort != null) {
-            return proxyPort.substring(proxyPort.indexOf(":") + 1, proxyPort.length());
+            return proxyPort.substring(proxyPort.lastIndexOf(":") + 1, proxyPort.length());
         }
         proxyPort = System.getenv("HTTP_PROXY");
         if (proxyPort != null) {
-            return proxyPort.substring(proxyPort.indexOf(":") + 1, proxyPort.length());
+            return proxyPort.substring(proxyPort.lastIndexOf(":") + 1, proxyPort.length());
         }
         return null;
     }
