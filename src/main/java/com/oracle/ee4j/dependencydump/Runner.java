@@ -247,6 +247,9 @@ public class Runner {
     }
 
     private Dependency getManagedDependency(Model model, Dependency dependency) {
+        if (model.getDependencyManagement() == null) {
+            return null;
+        }
         for (Dependency managed : model.getDependencyManagement().getDependencies()) {
             if (managed.getGroupId().equals(dependency.getGroupId()) && managed.getArtifactId().equals(dependency.getArtifactId())) {
                 return managed;
