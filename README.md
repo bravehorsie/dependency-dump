@@ -12,18 +12,21 @@ Two arguments are required for running: "path to your project" and "path to your
 Usage:
 java -jar dependencydump.jar -project ~/path/to/projectsources -localRepo ~/path/to/local/maven/repo
 
-Optional parameters:
+usage:
+ -excludeGroups <arg>   Excludes dependencies with specified groupIds
+                        separated by comma. Transitive dependencies of excluded artifacts will not
+                        be printed, use with caution.
+ -includeLicense        Include licenses parsed from POM files of direct
+                        dependencies. Default false.
+ -includeScopes <arg>   Include only dependencies with specified scopes.
+                        Separated by comma. Transitive dependencies of excluded artifacts will not
+                        be printed, use with caution.
+ -localRepo <arg>       Filesystem path to local maven repository
+                        (required)
+ -project <arg>         Filesystem path to project (required)
+ -tree                  Print dependencies as a tree merged from all
+                        subprojects instead of flat output. Default false.
 
-    -excludeGroups
-        Excludes dependencies with specified groupIds separated by comma.
-        Transitive dependencies of excluded artifacts will not be printed, use with caution.
-
-    -includeScopes
-        Include only dependencies with specified scopes. Separated by comma.
-        Transitive dependencies of excluded artifacts will not be printed, use with caution.
-
-    -printTree
-        Print dependencies as a tree merged from all subprojects instead of flat output. Default false.
 ```        
 
 ### Example

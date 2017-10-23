@@ -49,6 +49,7 @@ public class Main {
 
     private static final String excludeGroupsParam = "excludeGroups";
     private static final String includeScopesParam = "includeScopes";
+    private static final String includeLicense = "includeLicense";
     private static final String localRepoParam = "localRepo";
     private static final String projectParam = "project";
     private static final String printTree = "tree";
@@ -59,10 +60,11 @@ public class Main {
         System.setProperty("java.util.logging.SimpleFormatter.format", "%5$s%6$s%n");
 
         Options options = new Options();
-        options.addOption(new Option(localRepoParam, true, "Filesystem path to local maven repository"));
-        options.addOption(new Option(projectParam, true, "Filesystem path to project"));
+        options.addOption(new Option(localRepoParam, true, "Filesystem path to local maven repository (required)"));
+        options.addOption(new Option(projectParam, true, "Filesystem path to project (required)"));
         options.addOption(new Option(excludeGroupsParam, true, "Excludes dependencies with specified groupIds separated by comma. Transitive dependencies of excluded artifacts will not be printed, use with caution."));
         options.addOption(new Option(includeScopesParam, true, "Include only dependencies with specified scopes. Separated by comma. Transitive dependencies of excluded artifacts will not be printed, use with caution."));
+        options.addOption(new Option(includeLicense, false, "Include licenses parsed from POM files of direct dependencies. Default false."));
         options.addOption(new Option(printTree, false, "Print dependencies as a tree merged from all subprojects instead of flat output. Default false."));
 
         CommandLine line;

@@ -40,14 +40,14 @@
 
 package com.oracle.ee4j.dependencydump;
 
-import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.model.Dependency;
+import org.apache.maven.model.License;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.building.*;
 import org.apache.maven.model.resolution.ModelResolver;
+import org.apache.maven.model.resolution.UnresolvableModelException;
 import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.graph.DependencyNode;
-import org.eclipse.aether.graph.Exclusion;
 import org.eclipse.aether.resolution.DependencyResolutionException;
 import org.eclipse.aether.resolution.DependencyResult;
 
@@ -111,6 +111,18 @@ public class Runner {
                 .collect(Collectors.toList());
         directFiltered.forEach((dependency) -> {
             logger.info(dependency.getGroupId() + ":" + dependency.getArtifactId() +":" +dependency.getType() + ":" + dependency.getVersion() + ":" +dependency.getScope());
+            try {
+                ModelSource modelSource = modelResolver.resolveModel(dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion());
+                Model model = loadModel(modelSource);
+                logger.info("  POM Licenses: ");
+                for (License license  : model.getLicenses()) {
+                    logger.info("   " + license.getName());
+                    logger.info("   " + license.getUrl());
+                    logger.info("");
+                }
+            } catch (UnresolvableModelException | RuntimeException e) {
+                //doesn't matter
+            }
         });
         logger.info("\n Count: "+directFiltered.size());
         logger.info("\n ============================\n\n\n");
@@ -191,7 +203,7 @@ public class Runner {
 
     private void parsePom(String projectDir) {
 
-        model = loadModel(projectDir);
+        model = loadLocalPomModel(projectDir);
 
         projectArtifacts.add(new ProjectArtifact(model.getGroupId(), model.getArtifactId(), model.getVersion()));
 
@@ -207,6 +219,7 @@ public class Runner {
             String artifactId = toArtifactId(dependency);
 
             directDependencies.put(artifactId, dependency);
+
             DependencyResolver dependencyResolver = new DependencyResolver(repositorySupport);
             if (dependencyExcluded(dependency, getManagedDependency(model, dependency))) {
                 continue;
@@ -285,7 +298,7 @@ public class Runner {
     }
 
 
-    private Model loadModel(String projectDir) {
+    private Model loadLocalPomModel(String projectDir) {
 
         File pomFile = new File(projectDir + File.separator + pomName);
         if (!pomFile.exists()) {
@@ -295,6 +308,19 @@ public class Runner {
         final DefaultModelBuildingRequest modelBuildingRequest = new DefaultModelBuildingRequest()
                 .setSystemProperties(System.getProperties()).setModelResolver(modelResolver).setPomFile(pomFile);
 
+        return getModel(modelBuildingRequest);
+    }
+
+
+    private Model loadModel(ModelSource modelSource) {
+
+        final DefaultModelBuildingRequest modelBuildingRequest = new DefaultModelBuildingRequest()
+                .setSystemProperties(System.getProperties()).setModelResolver(modelResolver).setModelSource(modelSource);
+
+        return getModel(modelBuildingRequest);
+    }
+
+    private Model getModel(DefaultModelBuildingRequest modelBuildingRequest) {
         ModelBuilder modelBuilder = new DefaultModelBuilderFactory().newInstance();
         ModelBuildingResult modelBuildingResult;
         try {
