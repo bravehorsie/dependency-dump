@@ -89,42 +89,37 @@ public class Main {
         }
 
 
-        String projectPath = line.getOptionValue(projectParam);
-        String localRepo = line.getOptionValue(localRepoParam);
+        Builder builder = new Builder();
 
+        builder.setProjectPath(line.getOptionValue(projectParam));
+        builder.setLocalRepo(line.getOptionValue(localRepoParam));
 
-        String proxyHost = getProxyHost();
+        builder.setProxyHost(getProxyHost());
         String proxyPort = getProxyPort();
         Integer port = proxyPort!=null && !proxyPort.isEmpty() ? Integer.parseInt(proxyPort) : null;
-
-        Runner runner;
-        if (proxyHost != null && port != null) {
-            logger.info("Using proxy: " + proxyHost + ":"+proxyPort);
-            runner = new Runner(projectPath, localRepo, proxyHost, port);
-        } else {
-            runner = new Runner(projectPath, localRepo);
-        }
+        builder.setProxyPort(port);
 
         String excludes;
         if ((excludes = line.getOptionValue(excludeGroupsParam)) != null) {
             logger.info("Excluding ["+excludes+"] groups and its dependencies.");
-            runner.setExcludes(excludes.split(","));
+            builder.setExcludes(excludes.split(","));
         }
 
         String includes;
         if ((includes = line.getOptionValue(includeScopesParam)) != null) {
             logger.info("Including ["+includes+"] scopes.");
-            runner.setScopes(includes.split(","));
+            builder.setScopes(includes.split(","));
         }
 
         if (line.hasOption(printTree)) {
-            runner.setPrintTree(true);
+            builder.setPrintTree(true);
         }
 
         if (line.hasOption(includeLicense)) {
-            runner.setIncludeLicense(true);
+            builder.setIncludeLicense(true);
         }
 
+        Runner runner = builder.buildRunner();
         runner.run();
     }
 

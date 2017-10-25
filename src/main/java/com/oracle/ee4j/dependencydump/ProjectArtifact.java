@@ -40,24 +40,43 @@
 
 package com.oracle.ee4j.dependencydump;
 
-public class Runner {
+import java.util.Objects;
 
-    private final String rootProjectDir;
-    private DependencyCollector collector;
-    private Printer printer;
+final class ProjectArtifact {
+    private final String groupId;
+    private final String versionId;
+    private final String version;
 
-    public Runner(String rootProjectDir, DependencyCollector collector, Printer printer) {
-        this.rootProjectDir = rootProjectDir;
-        this.collector = collector;
-        this.printer = printer;
+    public ProjectArtifact(String groupId, String versionId, String version) {
+        this.groupId = groupId;
+        this.versionId = versionId;
+        this.version = version;
     }
 
-
-    public void run() {
-        collector.parsePom(rootProjectDir);
-        printer.print();
+    public String getGroupId() {
+        return groupId;
     }
 
+    public String getVersionId() {
+        return versionId;
+    }
 
+    public String getVersion() {
+        return version;
+    }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ProjectArtifact that = (ProjectArtifact) o;
+        return Objects.equals(groupId, that.groupId) &&
+                Objects.equals(versionId, that.versionId) &&
+                Objects.equals(version, that.version);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(groupId, versionId, version);
+    }
 }
