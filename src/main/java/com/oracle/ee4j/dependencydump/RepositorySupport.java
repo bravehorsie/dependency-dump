@@ -22,6 +22,7 @@ import org.eclipse.aether.transport.http.HttpTransporterFactory;
 import org.eclipse.aether.util.artifact.JavaScopes;
 import org.eclipse.aether.util.filter.DependencyFilterUtils;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -56,7 +57,9 @@ public class RepositorySupport {
     public List<RemoteRepository> getRepositories() {
         RemoteRepository central = new RemoteRepository.Builder("central", "default", "http://repo1.maven.org/maven2/")
                 .setProxy(proxy).build();
-        return Collections.singletonList(central);
+        RemoteRepository javaNet = new RemoteRepository.Builder("java.net", "default", "https://maven.java.net/content/groups/staging/")
+                .setProxy(proxy).build();
+        return Arrays.asList(central, javaNet);
     }
 
     public RepositorySystemSession newSession() {
