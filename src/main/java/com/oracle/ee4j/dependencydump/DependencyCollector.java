@@ -61,6 +61,8 @@ public class DependencyCollector {
             try {
                 DependencyResult dependencyResolved = dependencyResolver.resolve(dependency, scopes);
                 transitiveDependencies.add(dependencyResolved.getRoot());
+                logger.info("Resolved: "+dependency.getGroupId()+":"+dependency.getArtifactId()
+                        +":"+dependency.getVersion()+":"+dependency.getType());
             } catch (DependencyResolutionException e) {
                 logger.severe(e.getMessage());
                 if (e.getResult().getRoot() != null) {
