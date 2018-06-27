@@ -46,7 +46,7 @@ public class RepositorySupport {
 
     public RepositorySupport(String localRepositoryPath, String proxyHost, Integer proxyPort) {
         this(localRepositoryPath);
-        this.proxy = new Proxy(Proxy.TYPE_HTTP, "www-proxy-hqdc.us.oracle.com", 80);
+        this.proxy = new Proxy(Proxy.TYPE_HTTP, proxyHost, proxyPort);
     }
 
 
@@ -57,7 +57,8 @@ public class RepositorySupport {
     public List<RemoteRepository> getRepositories() {
         RemoteRepository central = new RemoteRepository.Builder("central", "default", "http://repo1.maven.org/maven2/")
                 .setProxy(proxy).build();
-        RemoteRepository javaNet = new RemoteRepository.Builder("java.net", "default", "https://maven.java.net/content/groups/staging/")
+
+        RemoteRepository javaNet = new RemoteRepository.Builder("java.net", "default", "https://maven.java.net/content/groups/promoted/")
                 .setProxy(proxy).build();
         return Arrays.asList(central, javaNet);
     }
